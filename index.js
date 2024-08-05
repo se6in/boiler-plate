@@ -4,6 +4,8 @@ const port = 5000
 const{User} = require("./models/User");
 const cookieParser = require('cookie-parser');
 const config = require('./config/key');
+const{auth}= require('./middleware/auth');
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
@@ -20,7 +22,7 @@ app.get('/', (req, res) => {
 })
 
 
-app.post('/register', (req, res) => {
+app.post('/api/users/register', (req, res) => {
   // 회원가입 시 필요한 정보를 client로부터 받아오기
   const user = new User(req.body);
   // DB에 데이터 저장
@@ -38,7 +40,7 @@ app.post('/register', (req, res) => {
   })
 })
 
-app.post('/login', (req, res) => {
+app.post('/api/users/login', (req, res) => {
   // 이메일이 DB에 있는지 확인
   User.findOne({
       email: req.body.email
@@ -77,6 +79,46 @@ app.post('/login', (req, res) => {
   })
 });
 
+
+//role 0 -> 일반유저 , role 0이 아니면 관리자
+app.get('/api/users/auth',auth,(req,res)=>{
+
+    //여기까지 미들웨어를 통과해 왔다는 얘기는 Authentication이 True라는 말.
+    res.status(200).json({
+        _id: req.user._id,
+        
+        isAdmin: req.user.role === 0 ? false : true,
+        isAuth : true,
+        email : req.user.email,
+        name: req.user.name,
+        lastname: req.user.lastname,
+        role: req.user.role,
+        image: req.user.image
+        
+    })
+
+
+})
+
+//try catch 구문으로 만들어야 가능할듯
+app.get('/api/users/logout', auth, (req, res) => {
+    User.findOneAndUpdate({
+        _id: req.user._id
+    }, {
+        token: ""
+    })
+    .then(() => {
+        return res.status(200).json({
+            logoutSuccess: true
+        });
+    })
+    .catch((err) => {
+        return res.status(400).json({
+            logoutSuccess: false,
+            message: err.message
+        });
+    })
+})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

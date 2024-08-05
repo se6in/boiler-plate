@@ -66,11 +66,29 @@ userSchema.methods.comparePassword = function(plainPassword) {
 
 userSchema.methods.generateToken = function() {
     // jwt 생성
-    user = this;
+    const user = this;
     const token = jwt.sign(user._id.toJSON(), 'secretToken');
     user.token = token;
 
     return user.save();
+}
+
+userSchema.statics.findByToken = function(token) {
+    const user = this;
+    const util = require('util');
+
+    return util.promisify(jwt.verify)(token, 'secretToken')
+        .then((decoded) => {
+            console.log(decoded);
+            return user.findOne({
+                "_id": decoded,
+                "token": token
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+            throw new Error("유효하지 않은 토큰입니다.");
+        });
 }
 
 const User = mongoose.model('User', userSchema)
