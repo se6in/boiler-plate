@@ -1,10 +1,9 @@
 const express = require('express')
 const app = express()
-const port = 5000
 const{User} = require("./models/User");
 const cookieParser = require('cookie-parser');
 const config = require('./config/key');
-const{auth}= require('./middleware/auth');
+const { auth } = require("./middleware/auth");
 
 
 app.use(express.json());
@@ -19,6 +18,10 @@ mongoose.connect(config.mongoURI,{
 
 app.get('/', (req, res) => {
   res.send('Hello World!~~~ ')
+})
+
+app.get('/api/hello', (req,res)=>{
+    res.send("안녕하세요~")
 })
 
 
@@ -119,6 +122,8 @@ app.get('/api/users/logout', auth, (req, res) => {
         });
     })
 })
+
+const port = 5000
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
