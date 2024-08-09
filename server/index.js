@@ -24,7 +24,6 @@ app.get('/api/hello', (req,res)=>{
     res.send("안녕하세요~")
 })
 
-
 app.post('/api/users/register', (req, res) => {
   // 회원가입 시 필요한 정보를 client로부터 받아오기
   const user = new User(req.body);
@@ -103,7 +102,7 @@ app.get('/api/users/auth',auth,(req,res)=>{
 
 })
 
-//try catch 구문으로 만들어야 가능할듯
+
 app.get('/api/users/logout', auth, (req, res) => {
     User.findOneAndUpdate({
         _id: req.user._id
